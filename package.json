@@ -9,8 +9,8 @@
     "test": "standard"
   },
   "dependencies": {
-    "express": "^4.15.3",
-    "express-basic-auth": "^1.1.1",
+    "express": "^4.17.1",
+    "express-basic-auth": "^1.2.0",
     "express-request-id": "^1.4.0"
   },
   "devDependencies": {

@@ -29,7 +29,7 @@ const addRequestId = require('express-request-id')()
 // Set up authentication middleware
 const basicAuth = require('express-basic-auth')
 const authenticate = basicAuth({
-  'users': { 'username': 'password' },
+  authorizer: myAuthorizer,
   'challenge': true,
   'realm': 'Ambassador Realm'
 })
@@ -71,6 +71,12 @@ app.listen(3000, function () {
   console.log('Subrequest auth server sample listening on port 3000')
 })
 
+function myAuthorizer(username, password) {
+  const userMatches = basicAuth.safeCompare(username, process.env.AUTH_USERNAME)
+  const passwordMatches = basicAuth.safeCompare(password, process.env.AUTH_PASSWORD)
+
+  return userMatches & passwordMatches
+}
 // Middleware to log requests, including basic auth header info
 function logRequests (req, res, next) {
   console.log('\nNew request')
@@ -93,7 +99,6 @@ function logRequests (req, res, next) {
 
   // Parse authorization header
   const userpass = Buffer.from(auth.slice(6), 'base64').toString()
-  console.log(`  Auth decodes to "${userpass}"`)
   const splitIdx = userpass.search(':')
   if (splitIdx < 1) {  // No colon or empty username
     console.log('  Bad authorization format')
@@ -103,6 +108,6 @@ function logRequests (req, res, next) {
   // Extract username and password pair
   const username = userpass.slice(0, splitIdx)
   const password = userpass.slice(splitIdx + 1)
-  console.log(`  Auth user="${username}" pass="${password}"`)
+  console.log(`  Auth user="${username}"`)
   return next()
 }
